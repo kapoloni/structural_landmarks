@@ -64,12 +64,12 @@ def join_descriptors(params_):
     for side in ["L", "R"]:
         print(inputfile)
         output = NEWFOLDER + "/" + inputfile + "_" + side + "_landmarks.txt"
-        inputf = DESCSHAPE + inputfile + "_" + side + "_landmarks.txt"
+        inputf = DESCGM + inputfile + "_" + side + "_landmarks.txt"
         posic, desc = get_position_descriptor(inputf)
         inputf = pd.concat([posic, desc.iloc[:, 3:]], axis=1)
         inputf.columns = inputf.columns.astype(str)
 
-        for name in [DESCGM, DESCWM, DESCCSF]:
+        for name in [DESCWM, DESCCSF]:
             tmp_inputf = name + inputfile + "_" + side + "_landmarks.txt"
             tmp_posic, tmp_desc = get_position_descriptor(tmp_inputf)
             tmp_inputf = pd.concat([tmp_posic, tmp_desc.iloc[:, 3:]], axis=1)
@@ -86,13 +86,10 @@ def join_descriptors(params_):
 
 if __name__ == "__main__":
 
-    STRUCT = "hippo"
-
-    DESCGM = "../../images/" + STRUCT + "/landgm/32/"
-    DESCWM = "../../images/" + STRUCT + "/landwm/32/"
-    DESCCSF = "../../images/" + STRUCT + "/landcsf/32/"
-    DESCSHAPE = "../../images/" + STRUCT + "/landshape/32/"
-
+    DESCGM = "../images/hippocampus/descriptor/gm/"
+    DESCWM = "../images/hippocampus/descriptor/wm/"
+    DESCCSF = "../images/hippocampus/descriptor/csf/"
+    
     if len(sys.argv) < 2:
         showUsage()
         exit()
@@ -111,7 +108,7 @@ if __name__ == "__main__":
         elif opt in ("-n", "--nfile"):
             NEWFOLDER = arg
 
-    path_in = get_directories(DESCSHAPE)
+    path_in = get_directories(DESCGM)
     p = multiprocessing.Pool(50)
     params = zip(path_in)
     p.map(join_descriptors, params)

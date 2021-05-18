@@ -7,7 +7,7 @@ from pathlib import Path
 import multiprocessing
 
 
-LAND = "../../../bin/bin/landmark-detector-tissues"
+LAND = "../bin/bin/landmark-detector-tissues"
 MASK = "/databases/data1_study1/AD/MRI/Katia/ADNI/experiment/ADNI/mesh/r8/"
 TISSUE = "/databases/data1_study1/AD/MRI/Katia/ADNI/experiment/ADNI/Fast/"
 
