@@ -1,0 +1,23 @@
+"""
+    Código para organizar os atributos de treino e teste extraídos
+    das predições dos descritores e gerar um arquivo de entrada
+    para o classificador no nível da imagem.
+"""
+./get_image_train_test_data.py
+returns in output: image_train_test_data
+
+"""
+    Salvar todos os modelos (pickles) de classificação e métricas
+"""
+./classification concatenated_features
+returns in results: pickle results for each feature
+
+"""
+    Gerar tabelas de resultados
+"""
+ipynb: table_results
+
+"""
+    Curvas ROC
+"""
+ipynb: ROC_curve

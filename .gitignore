@@ -73,6 +73,9 @@ atlas/brain/
 atlas/hippocampus_points/
 atlas/ventricles/
 atlas/ventricles0.3/
+image_level_scripts/images/
+image_level_scripts/image_train_test_data/
+image_level_scripts/results/
 
 
 # Translations
