@@ -51,6 +51,30 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 
+# Myfolders
+template/
+structural_landmarks/
+scripts/
+scripts2/
+scripts_welchs/
+scripts_prl/
+scripts_gm/
+scripts_10/
+scripts/
+scripts_image_processing/
+images/
+images0/
+experiment/
+experiment_old_file/
+experiment_shape/
+exp/
+bin/
+atlas/brain/
+atlas/hippocampus_points/
+atlas/ventricles/
+atlas/ventricles0.3/
+
+
 # Translations
 *.mo
 *.pot
