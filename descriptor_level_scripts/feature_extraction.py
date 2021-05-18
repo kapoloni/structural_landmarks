@@ -1,11 +1,15 @@
-#!/usr/bin/python3
+"""
+Feature extraction functions and paths
+"""
+
 # Standard library imports
+from __future__ import absolute_import
+from __future__ import print_function
 import os
 import numpy as np
 import pandas as pd
 
 # Third party imports
-from scipy import stats
 from pathlib import Path
 import multiprocessing
 
@@ -78,57 +82,11 @@ class FeatureExtraction():
             os.system(match_in + " -io " + atlas_ + " " + input_land +
                       self._ss+" -to 0.5 > " + output + self._ss + ".csv")
 
-    def concat_maxd(self, dt):
-        point_posic, counts = np.unique(dt[[0, 1, 2]],
-                                        return_counts=True, axis=0)
-        max_ = np.max(counts)+3
-        dist = np.full((len(point_posic), max_+3), -1, dtype=float)
-        for i, point in enumerate(point_posic):
-            v = dt[[0, 1, 2]] == point
-            v = dt.iloc[np.where(v.all(axis=1))[0]]
-            maxd = v.iloc[:, -1].transpose()
-            dist[i, :3] = point
-            dist[i, 3:len(maxd)+3] = maxd
+    
 
-        return pd.DataFrame(dist)
+    
 
-    def t_test(self, row, alpha):
-        c1 = row[row.index.str.contains('_c1')]
-        c2 = row[row.index.str.contains('_c2')]
-
-        c1 = c1[c1 > 0]
-        c2 = c2[c2 > 0]
-        t_score = stats.ttest_ind_from_stats(mean1=c2.mean(),
-                                             std1=c2.std(ddof=1),
-                                             nobs1=len(c2),
-                                             mean2=c1.mean(),
-                                             std2=c1.std(ddof=1),
-                                             nobs2=len(c1),
-                                             equal_var=True)
-        stat, p_value = t_score
-        p_value /= 2
-        if p_value < alpha and stat > 0:
-            return stat
-        else:
-            return np.nan
-
-    def distribution(self, c1, c2, alpha):
-        c1 = c1.reset_index(drop=True)
-        c2 = c2.reset_index(drop=True)
-        c1.columns = [str(col) + '_c1' if col not in [0, 1, 2] else col 
-                      for col in c1.columns]
-        c2.columns = [str(col) + '_c2' if col not in [0, 1, 2] else col
-                      for col in c2.columns]
-
-        dt_ = c1.merge(c2, on=[0, 1, 2])
-        dt = dt_.iloc[:, 3:]
-        print("before", len(dt))
-        dt['keep'] = dt.apply(self.t_test, axis=1, alpha=alpha)
-        pts = pd.concat([dt_.iloc[:, :3], dt['keep']], axis=1)
-        pts = pts.replace([np.inf, -np.inf], np.nan)
-        pts = pts.dropna().reset_index(drop=True)
-        print("after", len(pts))
-        return pts
+    
 
     def multip(self, input_land, path_out_, func, n_proc):
         params_ = zip(input_land, path_out_)

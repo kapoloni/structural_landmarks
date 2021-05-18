@@ -40,7 +40,7 @@ def match(params_):
     input_land, output, side = params_
     match_in = "../bin/bin/match-landmarks-maxd-prob"
     create_folders('/'.join(output.split("/")[:-1]))
-    side_name = "right" if side == 'R' else "left"
+    side_name = "right" if side == '_R' else "left"
     if not os.path.exists(output + side + ".csv"):
         os.system(match_in + " -io " + atlas.replace("side", side_name) + " " +
                   input_land + side + " -to 0.5 > " +

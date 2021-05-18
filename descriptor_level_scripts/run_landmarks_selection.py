@@ -16,7 +16,7 @@ def read_params(c1c2, side, fold, ft):
 
 if __name__ == "__main__":
 
-    result_folder = os.path.join("..", "exp")
+    result_folder = os.path.join("..", "experiment")
 
     features = ['gm', 'wm', 'csf', 'tissues']
 

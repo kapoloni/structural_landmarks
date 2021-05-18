@@ -1,4 +1,10 @@
+"""
+Utility functions
+"""
+
 # Standard library imports
+from __future__ import absolute_import
+from __future__ import print_function
 import os
 
 # Third party imports
@@ -53,6 +59,12 @@ def save_csv_header(data, name):
 def save_csv_desc(data, name):
     data.to_csv(name, sep=' ', encoding='utf-8', index=False, header=False)
 
+def get_directories_class(csv_file, c1, c2):
+    reader = pd.read_csv(csv_file, sep=",", header=None)
+    reader.columns = ['subj', 'label']
+    c1 = reader[reader.label == c1]
+    c2 = reader[reader.label == c2]
+    return pd.concat([c1.subj, c2.subj]).reset_index(drop=True)
 
 def create_folder_and_delete(name):
     if os.path.exists(name):
