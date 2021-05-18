@@ -34,16 +34,16 @@ if __name__ == "__main__":
             for side in ["L", "R"]:
                 print(side, fold)
                 # Get structural points/descriptors
-                # os.system("./structural_descriptors.py -n " + result_folder +
-                #           " -c " + exp[0] + " -d " +
-                #           exp[1] + " -s " + side + " -f " + fold)
+                os.system("./structural_descriptors.py -n " + result_folder +
+                          " -c " + exp[0] + " -d " +
+                          exp[1] + " -s " + side + " -f " + fold)
 
                 # Get attributes points/descriptors
-                os.system("./generate_descriptors_attributes.py -n " +
-                          result_folder + " -c " + exp[0] + " -d " + exp[1] +
-                          " -s " + side + " -f " + fold)
+                # os.system("./generate_descriptors_attributes.py -n " +
+                #           result_folder + " -c " + exp[0] + " -d " + exp[1] +
+                #           " -s " + side + " -f " + fold)
 
-
+            exit()
             # # Grid search
             # os.system("./grid_svc.py -n " + result_folder +
             #             " -r " + region + " -c " + exp[0] + " -d " +

@@ -43,8 +43,8 @@ def match(params_):
     side_name = "right" if side == 'R' else "left"
     if not os.path.exists(output + side + ".csv"):
         os.system(match_in + " -io " + atlas.replace("side", side_name) + " " +
-                  input_land + side+" -to 0.5 > " +
-                  output+side + ".csv")
+                  input_land + side + " -to 0.5 > " +
+                  output + side + ".csv")
 
 
 if __name__ == "__main__":

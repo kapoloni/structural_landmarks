@@ -7,7 +7,7 @@ from pathlib import Path
 import multiprocessing
 
 
-BCO = "../atlas/filter/logGab_#_256_256_256_04_06_03_033_209_055_120_0.bof"
+BCO = "../../filters256/logGab_#_256_256_256_04_06_03_033_209_055_120_0.bof"
 PHASE = "../bin/bin/phase-congruency"
 
 

@@ -1,7 +1,7 @@
 For IXI images
 # Phase congruency
-./pc_ixi.py -r /databases/data2/IXI/brain_extraction
-            -n ../images/hippocampus/ixi/pc
+./pc_ixi.py -r /databases/data1_study1/AD/MRI/Katia/IXI/brain_extraction/
+            -n ../images/pc/IXI
 
 # IXI is used only for the atlas
 
@@ -13,18 +13,14 @@ For IXI images
     - landmark descritors extractions
 
 # Phase congruency
-./pc_adni.py -r /databases/data2/ADNI/images/intensity_bs
-             -n ../images/hippocampus/adni/pc
+./pc_adni.py -r /databases/data1_study1/AD/MRI/Katia/ADNI/experiment/ADNI/brain_extraction
+             -n ../images/pc/ADNI
 
 # Matching descriptor
-# Spider-web
-./land_adni.py -r /databases/data2/ADNI/images/intensity_bs
-               -p ../../images/hippocampus/adni/pc
-               -l ../../images/hippocampus/adni/land/r8 -t s
-# Log-spherical
-./land_adni.py -r /databases/data2/ADNI/images/intensity_bs 
-               -p ../../images/hippocampus/adni/pc
-               -l ../../images/hippocampus/adni/land/r8 -t l
+    # Spider-web
+    ./land_adni.py -r /databases/data2/ADNI/images/intensity_bs
+                -p ../../images/hippocampus/adni/pc
+                -l ../../images/hippocampus/adni/land/r8 -t s
 
 # Fast ADNI
 
