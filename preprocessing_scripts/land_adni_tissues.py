@@ -8,8 +8,8 @@ import multiprocessing
 
 
 LAND = "../../../bin/bin/landmark-detector-tissues"
-MASK = "/databases/data1_study1/AD/MRI/Katia/ADNI2/experiment/ADNI/mesh/r8/"
-TISSUE = "/databases/data1_study1/AD/MRI/Katia/ADNI2/experiment/ADNI/Fast/"
+MASK = "/databases/data1_study1/AD/MRI/Katia/ADNI/experiment/ADNI/mesh/r8/"
+TISSUE = "/databases/data1_study1/AD/MRI/Katia/ADNI/experiment/ADNI/Fast/"
 
 
 # ********************************************************************
