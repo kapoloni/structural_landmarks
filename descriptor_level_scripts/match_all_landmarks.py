@@ -32,7 +32,8 @@ def get_directories(csv_file):
 
 def match(params_):
     input_land, output, side = params_
-    match_in = "../bin/bin/match-landmarks-maxd-prob"
+    match_in = os.path.join("..", "bin", "bin",
+                            "match-landmarks-maxd-prob")
     create_folders('/'.join(output.split("/")[:-1]))
     side_name = "right" if side == '_R' else "left"
     if not os.path.exists(output + side + ".csv"):

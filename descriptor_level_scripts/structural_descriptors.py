@@ -152,8 +152,9 @@ def associate_descriptor_atlas(fileP, fileD):
 
 def get_structural_atlas_descriptor():
     side_name = "right" if args.side == 'R' else "left"
-    atlas = "../atlas/hippocampus/" + side_name + \
-            "/output/IXI_20-80/probabilistic_atlas_averaged"
+    atlas = os.path.join("..", "atlas", "hippocampus", side_name,
+                         "output", "IXI_20-80",
+                         "probabilistic_atlas_averaged")
     pts = os.path.join(struc_th_folder, "struc_" + args.side + ".csv")
     desc = associate_descriptor_atlas(pts, atlas + "_landmarks.txt")
     save_csv_desc(desc, os.path.join(atlas_new_land_folder,

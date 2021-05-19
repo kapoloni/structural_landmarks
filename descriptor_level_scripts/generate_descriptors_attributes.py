@@ -39,7 +39,8 @@ def parse_args(args):
 
 def match_structural(params_):
     input_land, output, structural_atlas = params_
-    match_in = "../bin/bin/match-landmarks-maxd-prob"
+    match_in = os.path.join("..", "bin", "bin",
+                            "match-landmarks-maxd-prob")
 
     atlas = os.path.join(structural_atlas, "structural" + args.side)
     create_folders('/'.join(output.split("/")[:-1]))

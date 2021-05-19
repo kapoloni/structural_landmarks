@@ -1,14 +1,31 @@
 #!/usr/bin/python3
+"""
+    Organize the extracted training and test attributes
+    of the descriptions and generate an input file
+    for the classifier at the image level.
+"""
+
 # Standard library imports
+import argparse
 import numpy as np
 import pandas as pd
 import os
+import sys
 
-"""
-    Código para organizar os atributos de treino e teste extraídos
-    das predições dos descritores e gerar um arquivo de entrada
-    para o classificador no nível da imagem.
-"""
+
+def parse_args(args):
+    """!@brief
+    Parse the arguments.
+    """
+    parser = argparse.ArgumentParser(description='Generate image level attr')
+    parser.add_argument('--dest_folder', help='Destination folder',
+                        default='../experiment_cmpb', type=str)
+    return parser.parse_args(args)
+
+
+def create_folders(name):
+    if not os.path.exists(name):
+        os.makedirs(name, exist_ok=True)
 
 
 def fill_data(dt, idx):
@@ -67,14 +84,6 @@ def read_input(left, right, ft, train=True):
     data.columns = renamed_cols
 
     return data
-
-
-def get_adni_data():
-    adni = pd.read_csv("imgs_data.csv")
-    adni = adni[['Subject ID', 'Age', 'Sex']]
-    adni.columns = ['subj', 'age', 'sex']
-    adni = adni[['subj', 'age']]
-    return adni
 
 
 def get_left(dt):
@@ -143,26 +152,37 @@ def concat_features(left, right):
 
 if __name__ == "__main__":
 
-    path = os.path.join("predicted_descriptors_validation", "gm")
+    # Parse arguments
+    args = sys.argv[1:]
+    args = parse_args(args)
+    print(args)
+
+    path = os.path.join(args.dest_folder, "hippocampus", "fold",
+                        "predicted_descriptors_validation",
+                        "gm")
+
     cols = ['subj', '0', '1', 'p0', 'p1', 'N', 'class']
     features = ['gm', 'wm', 'csf', 'tissues']
-    output = 'image_train_test_data'
+    output = os.path.join(args.dest_folder, "hippocampus",
+                          "fold", 'image_train_test_data')
 
     for fold in range(10):
         for c1c2 in ['cn_ad', 'cn_mci', 'mci_ad']:
             fold = str(fold)
-            left = os.path.join("../", fold, path, c1c2, "data_L.csv")
-            right = os.path.join("../", fold, path, c1c2, "data_R.csv")
-            out_prefix = fold + "_" + c1c2
-
+            left = os.path.join(path.replace("fold", fold),
+                                c1c2, "data_L.csv")
+            right = os.path.join(path.replace("fold", fold),
+                                 c1c2, "data_R.csv")
+            output_folder = os.path.join(output.replace("fold", fold), c1c2)
+            create_folders(output_folder)
             train, test = concat_features(left, right)
 
-            print(train.head(), test.shape)
+            # print(train.head(), test.shape)
 
-            train.to_csv(os.path.join(output,
-                                      "fts_train_" + out_prefix + ".csv"),
+            train.to_csv(os.path.join(output_folder,
+                                      "fts_train.csv"),
                          index=False)
 
-            test.to_csv(os.path.join(output,
-                                     "fts_test_" + out_prefix + ".csv"),
+            test.to_csv(os.path.join(output_folder,
+                                     "fts_test.csv"),
                         index=False)

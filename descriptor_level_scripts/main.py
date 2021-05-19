@@ -68,4 +68,4 @@ if __name__ == "__main__":
                               result_folder + " --labels " + c1c2 +
                               " --side " + side + " --fold " + fold +
                               " --ft " + ft)
-            exit()
+

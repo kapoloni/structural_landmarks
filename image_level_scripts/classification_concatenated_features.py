@@ -1,9 +1,14 @@
 #!/usr/bin/python3
+"""
+    Save all classification models  (pickles) and metrics
+"""
 # Standard library imports
 import numpy as np
 import os
 import pandas as pd
 import pickle
+import argparse
+import sys
 
 # Third party imports
 from sklearn import svm
@@ -17,9 +22,20 @@ from sklearn.metrics import accuracy_score
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import balanced_accuracy_score
 
-"""
-    Salvar todos os modelos (pickles) de classificação e métricas
-"""
+
+def parse_args(args):
+    """!@brief
+    Parse the arguments.
+    """
+    parser = argparse.ArgumentParser(description='Classification Image level')
+    parser.add_argument('--dest_folder', help='Destination folder',
+                        default='../experiment_cmpb', type=str)
+    return parser.parse_args(args)
+
+
+def create_folders(name):
+    if not os.path.exists(name):
+        os.makedirs(name, exist_ok=True)
 
 
 class ColumnExtractor(object):
@@ -131,27 +147,32 @@ def fit_all_classifiers(df_train, df_test):
 
 
 def one_fold(folder, exp, fold, result_folder):
-    name_train = 'fts_train_{}_{}.csv'.format(str(fold), exp)
-    name_test = 'fts_test_{}_{}.csv'.format(str(fold), exp)
+    name_train = 'fts_train.csv'
+    name_test = 'fts_test.csv'
     df_train = pd.read_csv(os.path.join(folder, name_train))
     df_test = pd.read_csv(os.path.join(folder, name_test))
 
     result = fit_all_classifiers(df_train, df_test)
-    outfile = open('{}/clf_concatenated_{}_{}.pickle'.
-                   format(result_folder, str(fold),
-                          exp), 'wb')
+    outfile = open('{}/clf.pickle'.
+                   format(result_folder), 'wb')
+
     pickle.dump(result, outfile)
     outfile.close()
 
     return result
 
 
-def all_folds(exps, folds, result_folder):
+def all_folds(exps, folds):
+
     list_results = []
     for exp in exps:
         print(exp)
         for i in folds:
-            result = one_fold('image_train_test_data', exp, i, result_folder)
+            input_ = os.path.join(input_folder.replace("fold", str(i)), exp)
+            result_ = os.path.join(result_folder.replace("fold", str(i)), exp)
+            create_folders(result_)
+
+            result = one_fold(input_, exp, i, result_)
             list_results.append({'exp': exp, 'res': result})
 
     return list_results
@@ -159,10 +180,18 @@ def all_folds(exps, folds, result_folder):
 
 if __name__ == "__main__":
 
-    result_folder = "results"
-    regions = ['hippocampus']
-    exps = ['cn_ad', 'cn_mci', 'mci_ad']
-    fts = ['t1', 'gm', 'wm', 'csf', 'tissues', 'all']
+    # Parse arguments
+    args = sys.argv[1:]
+    args = parse_args(args)
+    print(args)
+
+    input_folder = os.path.join(args.dest_folder, "hippocampus",
+                                "fold", "image_train_test_data")
+    result_folder = os.path.join(args.dest_folder, "hippocampus",
+                                 "fold", 'image_results')
+
+    exps = ['mci_ad']  # 'cn_ad', 'cn_mci',
+    fts = ['gm', 'wm', 'csf', 'tissues']
     folds = range(10)
 
-    all_folds(exps, folds, result_folder)
+    all_folds(exps, folds)
