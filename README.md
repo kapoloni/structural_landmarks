@@ -33,7 +33,7 @@ http://adni.loni.usc.edu/ and https://brain-development.org/ixi-dataset/<br>
 # Results
 ## Best image-level results
 
- <table width="60%" border="0" cellpadding="5">
+ <table style="width:60%">
   <tr>
     <th></th>  
     <th>CNxMCI</th>
@@ -55,13 +55,13 @@ http://adni.loni.usc.edu/ and https://brain-development.org/ixi-dataset/<br>
 </table> 
 
 ## Scatter plots of four (out of the ten) image attributes for one fold of the CN×MCI, MCI×AD, and CN×AD experiments
-<table width="60%" border="0" cellpadding="5">
+<table style="width:60%">
   <tr>    
-    <td><img src="https://github.com/kapoloni/structural_landmarks/blob/main/figures/cn_mci_points.png"/>CN×MCI</td> 
-    <td><img src="https://github.com/kapoloni/structural_landmarks/blob/main/figures/mci_ad_points.png"/>MCI×AD</td> 
+    <td><img src="https://github.com/kapoloni/structural_landmarks/blob/main/figures/cn_mci_points.png" width=80%/>CN×MCI</td> 
+    <td><img src="https://github.com/kapoloni/structural_landmarks/blob/main/figures/mci_ad_points.png" width=80%/>MCI×AD</td> 
   </tr>
   <tr>
-    <td> <img src="https://github.com/kapoloni/structural_landmarks/blob/main/figures/cn_ad_points.png"/>CN×AD</td> 
+    <td> <img src="https://github.com/kapoloni/structural_landmarks/blob/main/figures/cn_ad_points.png" width=80%/>CN×AD</td> 
   </tr>
 </table>
       
