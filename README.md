@@ -3,10 +3,10 @@
 
 Our approach, based on a two-level classification, first detects and
 selects discriminative landmark points from two diagnosis populations based on
-their matching distance compared to a probabilistic atlas of 3-D labeled land-
-mark points. The points are classified using attributes computed in a spherical
-support region around each point using information from brain probability im-
-age tissues of gray matter, white matter, and cerebrospinal fluid as sources of
+their matching distance compared to a probabilistic atlas of 3-D labeled landmark points.
+The points are classified using attributes computed in a spherical
+support region around each point using information from brain probability image
+tissues of gray matter, white matter, and cerebrospinal fluid as sources of
 information. Next, at the second level, the images are classified based on a
 quantitative evaluation obtained from the first-level classifier outputs.
 
