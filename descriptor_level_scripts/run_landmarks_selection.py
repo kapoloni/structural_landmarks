@@ -36,13 +36,15 @@ if __name__ == "__main__":
             # for side in ["L", "R"]:
             #     print(side, fold)
             #     # Get structural points/descriptors
-            #     os.system("./structural_descriptors.py --dest_folder " + result_folder +
-            #               " --labels " + c1c2 + " --side " + side + " --fold " + fold)
-
-            #     # Get attributes points/descriptors
-            #     os.system("./generate_descriptors_attributes.py --dest_folder " +
+            #     os.system("./structural_descriptors.py --dest_folder " +
             #               result_folder + " --labels " + c1c2 +
             #               " --side " + side + " --fold " + fold)
+
+            #     # Get attributes points/descriptors
+            #     os.system("./generate_descriptors_attributes.py " +
+            #               " --dest_folder " + result_folder +
+            #               " --labels " + c1c2 + " --side " + side +
+            #               " --fold " + fold)
 
             # # Grid search
             # os.system("./grid_svc.py --dest_folder " + result_folder +
@@ -50,15 +52,14 @@ if __name__ == "__main__":
             # exit()
             for ft in features:
                 for side in ["R", "L"]:
-                    C = read_params(c1c2, side, fold, ft)
-                    # Classifiers
-                    os.system("./fit_classifier.py --dest_folder " +
+                    # C = read_params(c1c2, side, fold, ft)
+                    # # Classifiers
+                    # os.system("./fit_classifier.py --dest_folder " +
+                    #           result_folder + " --labels " + c1c2 +
+                    #           " --side " + side + " --fold " + fold +
+                    #           " --ft " + ft + " --c " + C)
+                    # Predictions
+                    os.system("./prediction.py --dest_folder " +
                               result_folder + " --labels " + c1c2 +
                               " --side " + side + " --fold " + fold +
-                              " --ft " + ft + " --c " + C)
-            #         # Predictions
-            #         os.system("./predict_descriptors.py -n " +
-            #                     result_folder + " -r " + region +
-            #                     " -d " + exp[0] + " -e " + exp[1] +
-            #                     " -s " + side + " -f " + ft + " -t " +
-            #                     fold)
+                              " --ft " + ft)

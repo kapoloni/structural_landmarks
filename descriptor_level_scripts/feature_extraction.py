@@ -23,53 +23,14 @@ class FeatureExtraction():
 
     def __init__(self, c1c2, side):
 
-        atlas_, template_, mask_, \
-            self.roi_size = self.get_atributes()
+        atlas = "../atlas/hippocampus/" + \
+            "side/output/IXI_20-80/probabilistic_atlas_averaged"
 
-        self.atlas, self.template, \
-            self.mask = self.define_variables_names(
-                        atlas_, template_, mask_, side)
+        self.atlas = atlas.replace("side", "left" if side == "L" else "right")
 
         self.side = side
 
-        self.class_ = c1c2
-
-        self.patch_size = 32
-
-        self.ss, self._ss = self.get_sides_strings(side)
-
-        self.th0, self.th1, self.th_ = 0.22, 0.4, 0.1
-
-    def define_variables_names(self, atlas_, template_, mask_, side):
-        side_name = "left" if side == "L" else "right"
-        template_ = template_.replace("Side", side_name.capitalize())
-        atlas_ = atlas_.replace("side", side_name)
-        mask_ = mask_.replace("Side", side_name.capitalize())
-        return atlas_, template_, mask_
-
-    def get_atributes(self):
-        template_ = "../template/NAC_T1_RAI.nii.gz"
-
-        atlas_ = "../atlas/hippocampus/" + \
-                 "side/output/IXI_20-80/probabilistic_atlas_averaged"
-        mask_ = "../template/hippocampus/Side_256.nii.gz"
-        roi_size_ = 64
-
-        return atlas_, template_, mask_, roi_size_
-
-    def get_sides_strings(self, side):
-        if side == "L":
-            ss = "_L_"
-        elif side == "R":
-            ss = "_R_"
-        elif side == "":
-            ss = ""
-
-        if side == "L" or side == "R":
-            _ss = "_"+ss.replace("_", "")
-        else:
-            _ss = ""
-        return str(ss), str(_ss)
+        self.labels = c1c2
 
     def match_structural(self, params_):
         input_land, output, atlas_new_land_folder = params_
@@ -77,9 +38,9 @@ class FeatureExtraction():
 
         atlas_ = os.path.join(atlas_new_land_folder, "structural" + self._ss)
         create_folders('/'.join(output.split("/")[:-1]))
-        if not Path(output + self._ss + ".csv").exists():
+        if not Path(output + "_" + self.side + ".csv").exists():
             os.system(match_in + " -io " + atlas_ + " " + input_land +
-                      self._ss+" -to 0.5 > " + output + self._ss + ".csv")
+                      "_" + self.side +" -to 0.5 > " + output + self._ss + ".csv")
 
     def multip(self, input_land, path_out_, func, n_proc):
         params_ = zip(input_land, path_out_)

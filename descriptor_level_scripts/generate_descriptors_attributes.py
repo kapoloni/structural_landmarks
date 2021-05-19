@@ -4,6 +4,7 @@
 from __future__ import absolute_import
 from __future__ import print_function
 import argparse
+import numpy as np
 import pandas as pd
 import sys
 import os
@@ -12,8 +13,12 @@ import os
 from utils import (get_directories_class,
                    save_csv,
                    create_folders,
-                   get_position_descriptor_txt)
-from feature_extraction import FeatureExtraction
+                   get_position_descriptor_txt,
+                   save_csv_desc,
+                   get_position_descriptor)
+
+# Third party imports
+import multiprocessing
 
 
 def parse_args(args):
@@ -32,27 +37,46 @@ def parse_args(args):
     return parser.parse_args(args)
 
 
-def match_atlas_structural(filenames):
-    input_land = [os.path.join(sw_landmarks, file) for file in filenames]
-    outputs = [os.path.join(match_struc_folder, file) for file in filenames]
-    atlas_newland_folder = [atlas_new_land_folder
-                            for i in range(len(input_land))]
-    params = zip(input_land, outputs, atlas_newland_folder)
-    fe.multproc(params, fe.match_structural, 35)
-    print("Done -- Match structural")
+def match_structural(params_):
+    input_land, output, structural_atlas = params_
+    match_in = "../bin/bin/match-landmarks-maxd-prob"
+
+    atlas = os.path.join(structural_atlas, "structural" + args.side)
+    create_folders('/'.join(output.split("/")[:-1]))
+    if not os.path.exists(output + "_" + args.side + ".csv").exists():
+        os.system(match_in + " -io " + atlas + " " + input_land +
+                  "_" + args.side + " -to 0.5 > " +
+                  output + args.side + ".csv")
 
 
-def get_attributes():
-    descriptors = [os.path.join(
-        desc_landmarks, file + "_" + args.side + "_landmarks.txt")
-                        for file in filenames]
-    points = [os.path.join(match_struc_folder, file + "_" +
-                           args.side) for file in filenames]
-    outputs = [os.path.join(desc_text_folder, file + "_" +
-                            args.side) for file in filenames]
-    params = zip(points, descriptors, outputs)
-    fe.multproc(params, fe.associate_attributes, 35)
-    print("Done -- get_attributes")
+def multproc(params_, func, n_proc):
+    p = multiprocessing.Pool(n_proc)
+    p.map(func, params_)
+    p.close()
+
+
+def associate_attributes(params_):
+    points, descriptors, outputs = params_
+
+    create_folders('/'.join(outputs.split("/")[:-1]))
+
+    fileP = pd.read_csv(points + ".csv", header=None)
+    fileP = fileP.iloc[:, -4:].T.reset_index(drop=True).T
+
+    posic, desc = get_position_descriptor(descriptors)
+    land = pd.concat([posic, desc], axis=1).astype(str)
+    land.columns = land.columns.astype(str)
+
+    fileP = fileP.astype(int).astype(str)
+    fileP.columns = fileP.columns.astype(str)
+    final = land.merge(fileP, on=['0', '1', '2'])
+    # adding first row
+    final.loc[-1] = [np.nan for x in range(0, final.shape[1])]
+    final.index = final.index + 1
+    final = final.sort_index()
+    final.iloc[0, :3] = [final.shape[0]-1, '0', '288']
+    final = final.iloc[:, :-1]
+    save_csv_desc(final, outputs+"_landmarks.txt")
 
 
 def generate_final_dataset(input):
@@ -70,6 +94,29 @@ def generate_final_dataset(input):
     dt = pd.concat(data, sort=True)
 
     return dt
+
+
+def match_atlas_structural(filenames):
+    input_land = [os.path.join(sw_landmarks, file) for file in filenames]
+    outputs = [os.path.join(match_struc_folder, file) for file in filenames]
+    structural_atlas = [structural_atlas
+                        for i in range(len(input_land))]
+    params = zip(input_land, outputs, structural_atlas)
+    multproc(params, match_structural, 35)
+    print("Done -- Match structural")
+
+
+def get_attributes():
+    descriptors = [os.path.join(
+        desc_landmarks, file + "_" + args.side + "_landmarks.txt")
+                        for file in filenames]
+    points = [os.path.join(match_struc_folder, file + "_" +
+                           args.side) for file in filenames]
+    outputs = [os.path.join(desc_text_folder, file + "_" +
+                            args.side) for file in filenames]
+    params = zip(points, descriptors, outputs)
+    multproc(params, associate_attributes, 35)
+    print("Done -- get_attributes")
 
 
 def generate_train_dataset():
@@ -92,8 +139,6 @@ if __name__ == "__main__":
     args = parse_args(args)
     print(args)
 
-    fe = FeatureExtraction(args.labels, args.side)
-
     # Define folders
     sw_landmarks = os.path.join('..', 'images', 'hippocampus',
                                 'descriptor', 'spiderweb')
@@ -101,7 +146,7 @@ if __name__ == "__main__":
                                   'descriptor', 'tissues')
 
     basename = os.path.join(args.dest_folder, "hippocampus", args.fold)
-    atlas_new_land_folder = os.path.join(basename, "atlas", args.labels)
+    structural_atlas = os.path.join(basename, "atlas", args.labels)
 
     for step in ['train', 'validation', 'test']:
         print("#"*5, step.capitalize(), "#"*5)

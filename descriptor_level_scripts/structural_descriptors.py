@@ -15,7 +15,7 @@ from scipy import stats
 # Local application imports
 from utils import (save_csv,
                    get_directories_class,
-                   associate_descriptor_atlas,
+                   get_position_descriptor_txt,
                    save_csv_desc,
                    create_folders)
 
@@ -127,6 +127,25 @@ def get_structural_points(c1, c2, alpha):
              os.path.join(struc_th_folder,
                           "struc_" + args.side + ".csv"))
     print("Done -- Points label")
+
+
+def associate_descriptor_atlas(fileP, fileD):
+    fileP = pd.read_csv(fileP, sep="\t", header=None)
+    posic, desc = get_position_descriptor_txt(fileD)
+    land = pd.concat([posic, desc], axis=1)
+    land.iloc[:, :3] = land.iloc[:, :3].astype(np.int64)
+    land.columns = land.columns.astype(str)
+    land = land.astype(str)
+    fileP.columns = fileP.columns.astype(str)
+    fileP = fileP.astype(str)
+    final = land.merge(fileP, on=['0', '1', '2'])
+    # adding first row
+    final.loc[-1] = [np.nan for x in range(0, final.shape[1])]
+    final.index = final.index + 1
+    final = final.sort_index()
+    final.iloc[0, :3] = [final.shape[0]-1, '250', '0']
+    # final.iloc[0, :3] = [final.shape[0]-1, '0', '200']
+    return final
 
 
 def get_structural_atlas_descriptor():

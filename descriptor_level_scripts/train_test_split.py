@@ -3,7 +3,7 @@
 # Standard library imports
 import os
 import sys
-import getopt
+import argparse
 
 # Third party imports
 import pandas as pd
@@ -11,22 +11,15 @@ import numpy as np
 from sklearn.model_selection import StratifiedKFold
 
 
-def showUsage():
-    print('./train_test_split.py -n <result_folder>')
-    sys.exit(2)
+def parse_args(args):
+    """!@brief
+    Parse the arguments.
+    """
+    parser = argparse.ArgumentParser(description='Split database')
+    parser.add_argument('--dest_folder', help='Destination folder',
+                        default='../experiment', type=str)
 
-
-def get_params(argv):
-    try:
-        opts, args = getopt.getopt(argv, "hn:", ["nfile="])
-    except getopt.GetoptError:
-        showUsage()
-    for opt, arg in opts:
-        if opt == '-h':
-            showUsage()
-        elif opt in ("-n", "--nfile"):
-            result_folder = arg
-    return result_folder
+    return parser.parse_args(args)
 
 
 def split_and_save_train_test(dt, result_folder):
@@ -125,13 +118,12 @@ def create_folders(name):
 
 if __name__ == "__main__":
 
-    if len(sys.argv) < 3:
-        showUsage()
-        exit()
+    # Parse arguments
+    args = sys.argv[1:]
+    args = parse_args(args)
+    print(args)
 
-    result_folder = get_params(sys.argv[1:])
-
-    result_folder = os.path.join(result_folder, "splits")
+    result_folder = os.path.join(args.dest_folder, "splits")
 
     create_folders(result_folder)
 

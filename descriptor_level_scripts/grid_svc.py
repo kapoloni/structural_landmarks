@@ -17,10 +17,10 @@ from sklearn import svm
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import GroupKFold
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import f1_score
 from sklearn.metrics import make_scorer
-from sklearn.model_selection import GroupKFold
 
 
 def parse_args(args):
