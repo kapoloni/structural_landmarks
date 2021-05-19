@@ -1,49 +1,46 @@
 #!/usr/bin/python3
+"""
+    Join all tissues descriptors
+"""
+# Standard library imports
 import sys
-import getopt
+import argparse
 import os
 import pandas as pd
 import numpy as np
+
+# Third party imports
 import multiprocessing
 
-# ********************************************************************
-#
-# ********************************************************************
 
+def parse_args(args):
+    """!@brief
+    Parse the arguments.
+    """
+    parser = argparse.ArgumentParser(
+        description='Join all tissues descriptors')
+    parser.add_argument('--new_folder', help='New folder',
+                        type=str)
 
-def showUsage():
-    print('./join_descriptors.py -n <new_folder>')
-    sys.exit(2)
-# ********************************************************************
-#
-# ********************************************************************
+    return parser.parse_args(args)
 
 
 def create_folders(new_folder):
     if not os.path.exists(new_folder):
         os.makedirs(new_folder, exist_ok=True)
 
-# ********************************************************************
-#
-# ********************************************************************
-
 
 def get_directories(root_folder):
     list_in = []
     for class_ in os.listdir(root_folder):
-        if os.path.isdir(root_folder + "/" + class_):
-            create_folders(NEWFOLDER + "/" + class_)
-        for filename in os.listdir(root_folder + "/" + class_):
+        if os.path.isdir(os.path.join(root_folder, class_)):
+            create_folders(os.path.join(args.new_folder, class_))
+        for filename in os.listdir(os.path.join(root_folder, class_)):
             if "_L_landmarks.txt" in filename:
                 filename = filename.split("_L_landmarks.txt")[0]
-                input_img = class_ + "/" + filename
-                list_in.append(input_img)
+                list_in.append(os.path.join(class_, filename))
     return list_in
 
-
-# ********************************************************************
-#
-# ********************************************************************
 
 def get_position_descriptor(filename):
     reader = pd.read_csv(filename, header=None)
@@ -54,16 +51,13 @@ def get_position_descriptor(filename):
         desc = desc.iloc[:, :-1]
     return land, desc
 
-# ********************************************************************
-#
-# ********************************************************************
-
 
 def join_descriptors(params_):
     inputfile = params_[0]
     for side in ["L", "R"]:
         print(inputfile)
-        output = NEWFOLDER + "/" + inputfile + "_" + side + "_landmarks.txt"
+        output = os.path.join(args.newfolder,
+                              inputfile + "_" + side + "_landmarks.txt")
         inputf = DESCGM + inputfile + "_" + side + "_landmarks.txt"
         posic, desc = get_position_descriptor(inputf)
         inputf = pd.concat([posic, desc.iloc[:, 3:]], axis=1)
@@ -79,34 +73,17 @@ def join_descriptors(params_):
             inputf.columns = [str(i) for i in range(len(inputf.columns))]
         inputf.to_csv(output, index=False, header=False)
 
-# ********************************************************************
-#
-# ********************************************************************
-
 
 if __name__ == "__main__":
+
+    # Parse arguments
+    args = sys.argv[1:]
+    args = parse_args(args)
+    print(args)
 
     DESCGM = "../images/hippocampus/descriptor/gm/"
     DESCWM = "../images/hippocampus/descriptor/wm/"
     DESCCSF = "../images/hippocampus/descriptor/csf/"
-    
-    if len(sys.argv) < 2:
-        showUsage()
-        exit()
-    argv = sys.argv[1:]
-
-    root_file = ''
-
-    try:
-        opts, args = getopt.getopt(argv, "hn:", ["nfile="])
-    except getopt.GetoptError:
-        showUsage()
-    # print(opts)
-    for opt, arg in opts:
-        if opt == '-h':
-            showUsage()
-        elif opt in ("-n", "--nfile"):
-            NEWFOLDER = arg
 
     path_in = get_directories(DESCGM)
     p = multiprocessing.Pool(50)

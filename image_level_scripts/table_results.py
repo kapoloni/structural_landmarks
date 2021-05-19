@@ -64,7 +64,7 @@ def get_latex_table(dt, exp, round=3):
     fts_name = {'gm': 'GM',
                 'wm': 'WM',
                 'csf': 'CSF',
-                'tissues': 'GM\&WM\&CSF'}
+                'tissues': 'GM\\&WM\\&CSF'}
 
     cols = ['auc', 'acc', 'sens', 'spe', 'f1', 'ft']
     dt = dt[dt['exp'] == exp][cols]
@@ -82,10 +82,10 @@ def get_latex_table(dt, exp, round=3):
                 stds.loc[ft, metric] = (stds.loc[ft, metric]/100).round(round)
 
             text += ' & $' + str(means.loc[ft, metric]).replace(".", ',') + \
-                    "\pm" + str(stds.loc[ft, metric]).replace(".", ',')+"$ "
+                    "\\pm" + str(stds.loc[ft, metric]).replace(".", ',')+"$ "
         text += "\\tabularnewline"
         print(text)
-        print("\midrule")
+        print("\\midrule")
 
 
 if __name__ == "__main__":

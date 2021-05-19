@@ -75,6 +75,7 @@ atlas/ventricles/
 atlas/ventricles0.3/
 image_level_scripts/results
 experiment_cmpb/hippocampus
+filters/
 
 # Translations
 *.mo
