@@ -27,7 +27,7 @@ if __name__ == "__main__":
     # Matches
     os.system("./match_all_landmarks.py -n " + result_folder)
 
-    for exp in [['CN', 'AD'], ['CN', 'MCI'], ['MCI', 'AD']]:
+    for exp in [['CN', 'AD']]:  # , ['CN', 'MCI'], ['MCI', 'AD']
         for fold in range(0, 10):
             fold = str(fold)
             c1c2 = exp[0].lower() + "_" + exp[1].lower()
@@ -39,16 +39,15 @@ if __name__ == "__main__":
                           exp[1] + " -s " + side + " -f " + fold)
 
                 # Get attributes points/descriptors
-                # os.system("./generate_descriptors_attributes.py -n " +
-                #           result_folder + " -c " + exp[0] + " -d " + exp[1] +
-                #           " -s " + side + " -f " + fold)
+                os.system("./generate_descriptors_attributes.py -n " +
+                          result_folder + " -c " + exp[0] + " -d " + exp[1] +
+                          " -s " + side + " -f " + fold)
 
-            exit()
-            # # Grid search
-            # os.system("./grid_svc.py -n " + result_folder +
-            #             " -r " + region + " -c " + exp[0] + " -d " +
-            #             exp[1] + " -f " + fold)
-
+            # Grid search
+            os.system("./grid_svc.py -n " + result_folder +
+                      " -c " + exp[0] + " -d " +
+                      exp[1] + " -f " + fold)
+            # exit()
             # for ft in features:
             #     for side in ["R", "L"]:
             #         C = read_params(c1c2, side, fold, ft)

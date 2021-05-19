@@ -168,13 +168,13 @@ if __name__ == "__main__":
     match_folder = os.path.join(result_folder, "hippocampus", "match")
 
     basename = os.path.join(result_folder, "hippocampus", fold)
-    struc_th_folder = os.path.join(basename, "struc_th", c1c2)
+    struc_th_folder = os.path.join(basename, "structural_positions", c1c2)
     atlas_new_land_folder = os.path.join(basename, "atlas", c1c2)
 
     create_folders(struc_th_folder)
     create_folders(atlas_new_land_folder)
 
-    images = os.path.join(result_folder, "splits", "split_1",
+    images = os.path.join(result_folder, "splits",
                           "train_" + fold + ".csv")
 
     filenames = get_directories_class(images, class1, class2)

@@ -29,7 +29,7 @@ def get_params(argv):
     return result_folder
 
 
-def split_and_save_train_test(dt, result_folder1, result_folder2):
+def split_and_save_train_test(dt, result_folder):
     dt = get_groups(dt)
 
     skf = StratifiedKFold(n_splits=10)
@@ -46,11 +46,8 @@ def split_and_save_train_test(dt, result_folder1, result_folder2):
         print("Test", test.subject.shape, np.unique(test.label,
                                                     return_counts=True))
 
-        train1 = pd.concat([train.subject, train.label], axis=1)
         test1 = pd.concat([test.subject, test.label], axis=1)
-        train1.to_csv(os.path.join(result_folder1, "train_" + str(i) +
-                      ".csv"), index=False, header=False)
-        test1.to_csv(os.path.join(result_folder1, "test_" + str(i) +
+        test1.to_csv(os.path.join(result_folder, "test_" + str(i) +
                      ".csv"), index=False, header=False)
 
         # Split2
@@ -71,9 +68,9 @@ def split_and_save_train_test(dt, result_folder1, result_folder2):
         train2 = pd.concat([train.subject, train.label], axis=1)
         test2 = pd.concat([test.subject, test.label], axis=1)
 
-        train2.to_csv(os.path.join(result_folder2, "train_" +
+        train2.to_csv(os.path.join(result_folder, "train_" +
                       str(i) + ".csv"), index=False, header=False)
-        test2.to_csv(os.path.join(result_folder2, "test_" +
+        test2.to_csv(os.path.join(result_folder, "validation_" +
                      str(i) + ".csv"), index=False, header=False)
 
 
@@ -134,8 +131,9 @@ if __name__ == "__main__":
 
     result_folder = get_params(sys.argv[1:])
 
-    create_folders(os.path.join(result_folder, "splits", "split_1"))
-    create_folders(os.path.join(result_folder, "splits", "split_2"))
+    result_folder = os.path.join(result_folder, "splits")
+
+    create_folders(result_folder)
 
     database = os.path.join("..", "images", "hippocampus",
                             "descriptor", "spiderweb")
@@ -145,7 +143,4 @@ if __name__ == "__main__":
     dt = organize_data_class(input_)
 
     split_and_save_train_test(dt,
-                              os.path.join(result_folder,
-                                           "splits", "split_1"),
-                              os.path.join(result_folder,
-                                           "splits", "split_2"))
+                              result_folder)

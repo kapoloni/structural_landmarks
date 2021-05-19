@@ -1,18 +1,23 @@
 #!/usr/bin/python3
 
 # Standard library imports
+from __future__ import absolute_import
+from __future__ import print_function
 import getopt
+import pandas as pd
 import sys
 import os
 
 # Local application imports
-from utils import (save_csv,
-                   create_folders)
+from utils import (get_directories_class,
+                   save_csv,
+                   create_folders,
+                   get_position_descriptor_txt)
 from feature_extraction import FeatureExtraction
 
 
 def showUsage():
-    print('./structural_descriptors.py -n <result_folder>\
+    print('./generate_descriptors_attributes.py -n <result_folder>\
           -c <c1> -d <c2> -s <L|R> -f <fold num>')
     sys.exit(2)
 
@@ -43,7 +48,7 @@ def get_params(argv):
 
 
 def match_atlas_structural(filenames):
-    input_land = [os.path.join(match_landmarks, file) for file in filenames]
+    input_land = [os.path.join(sw_landmarks, file) for file in filenames]
     outputs = [os.path.join(match_struc_folder, file) for file in filenames]
     atlas_newland_folder = [atlas_new_land_folder
                             for i in range(len(input_land))]
@@ -65,10 +70,27 @@ def get_attributes():
     print("Done -- get_attributes")
 
 
-def generate_dataset():
+def generate_final_dataset(input):
+    data = []
+
+    for i in range(len(input)):
+        _, desc = get_position_descriptor_txt(
+            input[i])
+        desc = desc.T.reset_index(drop=True).T
+        desc['subj'] = input[i].split("/")[-1].\
+            split("_landmarks")[0]
+        desc['label'] = input[i].split("/")[-2]
+
+        data.append(desc)
+    dt = pd.concat(data, sort=True)
+
+    return dt
+
+
+def generate_train_dataset():
     inputs = [os.path.join(desc_text_folder, file +
                            fe._ss + "_landmarks.txt") for file in filenames]
-    data = fe.generate_final_dataset(inputs)
+    data = generate_final_dataset(inputs)
     save_csv(data, os.path.join(final_desc_folder,
                                 "dataset" + fe._ss + ".csv"))
     print("Done -- Final dataset")
@@ -90,54 +112,39 @@ if __name__ == "__main__":
     fe = FeatureExtraction(c1c2, side)
 
     # Define folders
-    match_landmarks = os.path.join('..', 'images', 'hippocampus',
-                                   'descriptor', 'spiderweb')
+    sw_landmarks = os.path.join('..', 'images', 'hippocampus',
+                                'descriptor', 'spiderweb')
     desc_landmarks = os.path.join('..', 'images', 'hippocampus',
-                                  'descriptor_and_tissues', 'log_sph')
+                                  'descriptor', 'tissues')
 
     basename = os.path.join(result_folder, "hippocampus", fold)
-    count_matching_folder = os.path.join(basename, "counts", c1c2)
-    struc_th_folder = os.path.join(basename, "struc_th", c1c2)
     atlas_new_land_folder = os.path.join(basename, "atlas", c1c2)
 
-    # For split2 train: i.e., training images
-    match_struc_folder = os.path.join(basename, "match_struc", c1c2)
-    desc_text_folder = os.path.join(basename, "desc", c1c2)
-    final_desc_folder = os.path.join(basename, "final_desc", c1c2)
-    create_folders(match_struc_folder)
-    create_folders(desc_text_folder)
-    create_folders(final_desc_folder)
+    for step in ['train', 'validation', 'test']:
+        print("#"*5, step.capitalize(), "#"*5)
 
-    images = os.path.join(result_folder, "splits", "split_2",
-                          "train_" + fold + ".csv")
-    filenames = fe.get_directories_class(images, class1, class2)
-    input_land = str(match_landmarks) + "/" + filenames
+        match_struc_folder = os.path.join(basename,
+                                          "match_struc_" + step,
+                                          c1c2)
+        desc_text_folder = os.path.join(basename,
+                                        "tissues_descriptors_" + step,
+                                        c1c2)
 
-    match_atlas_structural(filenames)
+        create_folders(match_struc_folder)
+        create_folders(desc_text_folder)
 
-    get_attributes()
-    generate_dataset()
+        images = os.path.join(result_folder, "splits",
+                              step + "_" + fold + ".csv")
+        filenames = get_directories_class(images, class1, class2)
+        input_land = str(sw_landmarks) + "/" + filenames
 
-    # For split2 test: i.e., validation images
-    match_struc_folder = os.path.join(basename, "match_struc_t2", c1c2)
-    desc_text_folder = os.path.join(basename, "desc_t2", c1c2)
-    create_folders(match_struc_folder)
-    create_folders(desc_text_folder)
+        match_atlas_structural(filenames)
 
-    images = os.path.join(result_folder, "splits", "split_2",
-                          "test_" + fold + ".csv")
-    filenames = fe.get_directories_class(images, class1, class2)
-    match_atlas_structural(filenames)
-    get_attributes()
+        get_attributes()
 
-    # For split split 1 test: i.e., test images
-    match_struc_folder = os.path.join(basename, "match_struc_t1", c1c2)
-    desc_text_folder = os.path.join(basename, "desc_t1", c1c2)
-    create_folders(match_struc_folder)
-    create_folders(desc_text_folder)
-
-    images = os.path.join(result_folder, "splits", "split_1",
-                          "test_" + fold + ".csv")
-    filenames = fe.get_directories_class(images, class1, class2)
-    match_atlas_structural(filenames)
-    get_attributes()
+        if step == 'train':
+            final_desc_folder = os.path.join(basename,
+                                             "svm_descriptor_" + step,
+                                             c1c2)
+            create_folders(final_desc_folder)
+            generate_train_dataset()
