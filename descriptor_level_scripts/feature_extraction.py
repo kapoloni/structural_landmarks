@@ -16,8 +16,7 @@ import multiprocessing
 # Local application imports
 from utils import (create_folders,
                    get_position_descriptor,
-                   save_csv_desc,
-                   get_position_descriptor_txt)
+                   save_csv_desc)
 
 
 class FeatureExtraction():

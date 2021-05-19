@@ -3,7 +3,7 @@
 # Standard library imports
 from __future__ import absolute_import
 from __future__ import print_function
-import getopt
+import argparse
 import numpy as np
 import pandas as pd
 import sys
@@ -20,35 +20,20 @@ from utils import (save_csv,
                    create_folders)
 
 
-def showUsage():
-    print('./structural_descriptors.py -n <result_folder>\
-          -c <c1> -d <c2> -s <L|R> -f <fold num>')
-    sys.exit(2)
-
-
-def get_params(argv):
-    try:
-        opts, args = getopt.getopt(argv,
-                                   "hn:c:d:s:f:t:",
-                                   ["nfile=",
-                                    "c1file=", "c2file=",
-                                    "sfile=", "fnum="])
-    except getopt.GetoptError:
-        showUsage()
-    for opt, arg in opts:
-        if opt == '-h':
-            showUsage()
-        elif opt in ("-n", "--nfile"):
-            result_folder_ = arg
-        elif opt in ("-c", "--c1file"):
-            c1_ = arg
-        elif opt in ("-d", "--c2file"):
-            c2_ = arg
-        elif opt in ("-s", "--sfile"):
-            side_ = arg
-        elif opt in ("-f", "--fnum"):
-            fold = arg
-    return result_folder_, c1_, c2_, side_, fold
+def parse_args(args):
+    """!@brief
+    Parse the arguments.
+    """
+    parser = argparse.ArgumentParser(description='Generate descriptors')
+    parser.add_argument('--dest_folder', help='Destination folder',
+                        default='../experiment', type=str)
+    parser.add_argument('--labels', help='Labels to perform the experiment',
+                        default='cn_ad', type=str)
+    parser.add_argument('--side', help='Hippocampal side',
+                        default='L', type=str)
+    parser.add_argument('--fold', help='Fold number',
+                        type=str)
+    return parser.parse_args(args)
 
 
 def get_maxd(input):
@@ -87,8 +72,9 @@ def concat_maxd(dt):
 
 
 def count_matches(filenames):
-    in_ = str(match_folder) + "/" + filenames + "_" + side
-    c1, c2 = concat_match_maxd(in_, class1, class2)
+    in_ = str(match_folder) + "/" + filenames + "_" + args.side
+    c1, c2 = concat_match_maxd(in_, args.labels.split("_")[0].upper(),
+                               args.labels.split("_")[1].upper())
     maxd_c1 = concat_maxd(c1)
     maxd_c2 = concat_maxd(c2)
     print("Done -- count_points_matches")
@@ -139,49 +125,49 @@ def get_structural_points(c1, c2, alpha):
     struc = distribution(c1, c2, alpha)
     save_csv(struc.iloc[:, :3].astype(int),
              os.path.join(struc_th_folder,
-                          "struc_" + side + ".csv"))
+                          "struc_" + args.side + ".csv"))
     print("Done -- Points label")
 
 
 def get_structural_atlas_descriptor():
-    side_name = "right" if side == 'R' else "left"
+    side_name = "right" if args.side == 'R' else "left"
     atlas = "../atlas/hippocampus/" + side_name + \
             "/output/IXI_20-80/probabilistic_atlas_averaged"
-    pts = os.path.join(struc_th_folder, "struc_" + side + ".csv")
+    pts = os.path.join(struc_th_folder, "struc_" + args.side + ".csv")
     desc = associate_descriptor_atlas(pts, atlas + "_landmarks.txt")
     save_csv_desc(desc, os.path.join(atlas_new_land_folder,
-                  "structural_" + side + "_landmarks.txt"))
+                  "structural_" + args.side + "_landmarks.txt"))
     print("Done -- get_structural_atlas_descriptor")
 
 
 if __name__ == "__main__":
 
-    if len(sys.argv) < 6:
-        showUsage()
-        exit()
-
-    result_folder, class1, class2, side, fold = get_params(
-        sys.argv[1:])
-    c1c2 = class1.lower()+"_"+class2.lower()
+    # Parse arguments
+    args = sys.argv[1:]
+    args = parse_args(args)
+    print(args)
 
     # Define folders
-    match_folder = os.path.join(result_folder, "hippocampus", "match")
+    match_folder = os.path.join(args.dest_folder, "hippocampus", "match")
 
-    basename = os.path.join(result_folder, "hippocampus", fold)
-    struc_th_folder = os.path.join(basename, "structural_positions", c1c2)
-    atlas_new_land_folder = os.path.join(basename, "atlas", c1c2)
+    basename = os.path.join(args.dest_folder, "hippocampus", args.fold)
+    struc_th_folder = os.path.join(
+        basename, "structural_positions", args.labels)
+    atlas_new_land_folder = os.path.join(basename, "atlas", args.labels)
 
     create_folders(struc_th_folder)
     create_folders(atlas_new_land_folder)
 
-    images = os.path.join(result_folder, "splits",
-                          "train_" + fold + ".csv")
+    images = os.path.join(args.dest_folder, "splits",
+                          "train_" + args.fold + ".csv")
 
-    filenames = get_directories_class(images, class1, class2)
+    filenames = get_directories_class(images,
+                                      args.labels.split("_")[0].upper(),
+                                      args.labels.split("_")[1].upper())
 
     c1, c2 = count_matches(filenames)
 
-    if c1c2 == 'mci_ad':
+    if args.labels == 'mci_ad':
         get_structural_points(c1, c2, 0.05)
     else:
         get_structural_points(c1, c2, 0.01)

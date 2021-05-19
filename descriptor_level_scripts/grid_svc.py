@@ -7,10 +7,11 @@ SVM grid search classifier for the descriptors level
 import pandas as pd
 import numpy as np
 import os
-import getopt
+import argparse
 import sys
 
 # Third party imports
+from joblib import dump
 import multiprocessing
 from sklearn import svm
 from sklearn.pipeline import Pipeline
@@ -20,36 +21,20 @@ from sklearn.metrics import confusion_matrix
 from sklearn.metrics import f1_score
 from sklearn.metrics import make_scorer
 from sklearn.model_selection import GroupKFold
-from joblib import dump
 
 
-def showUsage():
-    print('./grid_svc.py -n <result_folder>\
-          -c -d')
-    sys.exit(2)
-
-
-def get_params(argv):
-    try:
-        opts, args = getopt.getopt(argv,
-                                   "hn:c:d:f:t:", ["nfile=",
-                                                   "c1file=",
-                                                   "c2file=",
-                                                   "fnum="])
-    except getopt.GetoptError:
-        showUsage()
-    for opt, arg in opts:
-        if opt == '-h':
-            showUsage()
-        elif opt in ("-n", "--nfile"):
-            result_folder_ = arg
-        elif opt in ("-c", "--c1file"):
-            c1_ = arg
-        elif opt in ("-d", "--c2file"):
-            c2_ = arg
-        elif opt in ("-f", "--fnum"):
-            fold = arg
-    return result_folder_, c1_, c2_, fold
+def parse_args(args):
+    """!@brief
+    Parse the arguments.
+    """
+    parser = argparse.ArgumentParser(description='Grid Search')
+    parser.add_argument('--dest_folder', help='Destination folder',
+                        default='../experiment', type=str)
+    parser.add_argument('--labels', help='Labels to perform the experiment',
+                        default='cn_ad', type=str)
+    parser.add_argument('--fold', help='Fold number',
+                        type=str)
+    return parser.parse_args(args)
 
 
 def multip(params_, func, n_proc):
@@ -135,14 +120,8 @@ def my_scorer_groups(y_true, y_pred, groups):
     return np.mean(f1s)
 
 
-def my_custom_loss_func(y_true, y_pred):
-    return 0
-
-
 def grid_search(X, y, njobs, output_, groups):
     my_score = make_scorer(my_scorer_groups, groups=groups)
-    # my_score = make_scorer(my_custom_loss_func, groups=groups)
-    # print(my_score)
     cv = GroupKFold(n_splits=5)
     print("##"*5, 'Grid Search', "##"*5)
     print(X.shape)
@@ -183,16 +162,16 @@ def grid_search(X, y, njobs, output_, groups):
 
 
 def svm_grid(input, side):
-    classifier_folder = os.path.join(result_folder, "hippocampus",
-                                     fold, "classifiers")
+    classifier_folder = os.path.join(args.dest_folder, "hippocampus",
+                                     args.fold, "grid_search")
     reader = pd.read_csv(input, sep='\t', header=None)
     y = reader.iloc[:, -1]
     groups = reader.iloc[:, -2]
 
-    if c1c2 == "mci_ad":
-        y = np.where(y == class1, 1, 0)
+    if args.labels == "mci_ad":
+        y = np.where(y == args.labels.split("_")[0].upper(), 1, 0)
     else:
-        y = np.where(y == class1, 0, 1)
+        y = np.where(y == args.labels.split("_")[0].upper(), 0, 1)
 
     print("\nSide: ", side, "\nClass: ", np.unique(y, return_counts=True))
     attributes = get_descriptors(reader.iloc[:, :-2])
@@ -202,9 +181,9 @@ def svm_grid(input, side):
         result_dict = {}
         print(tissue, X.shape)
 
-        output_folder = os.path.join(classifier_folder + tissue, c1c2)
+        output_folder = os.path.join(classifier_folder, tissue, args.labels)
         create_folders(output_folder)
-        output = os.path.join(output_folder, "model_" + side + ".pkl")
+        output = os.path.join(output_folder, "model_gs_" + side + ".pkl")
 
         best, auc = grid_search(X, y, -1, output, groups)
         result_dict['best'], result_dict['auc'] = best, auc
@@ -214,7 +193,7 @@ def svm_grid(input, side):
     print(pd.DataFrame(results), "\n\n")
     print(results)
     save_csv(pd.DataFrame(results),
-             output_folder+"output"+side+".csv")
+             os.path.join(output_folder, "output" + side + ".csv"))
 
 
 # ********************************************************************
@@ -224,19 +203,17 @@ def svm_grid(input, side):
 
 if __name__ == "__main__":
 
-    if len(sys.argv) < 5:
-        showUsage()
-        exit()
+    # Parse arguments
+    args = sys.argv[1:]
+    args = parse_args(args)
+    print(args)
 
-    result_folder, class1, class2, fold = get_params(sys.argv[1:])
+    basename = os.path.join(args.dest_folder,
+                            "hippocampus", args.fold)
 
-    c1c2 = class1.lower()+"_"+class2.lower()
-
-    basename = os.path.join(result_folder, "hippocampus", fold)
-
-    descriptors = os.path.join(basename, "svm_descriptor_train", c1c2)
-    output_folder = os.path.join(basename, "svm_results", c1c2)
-    create_folders(output_folder)
+    descriptors = os.path.join(basename,
+                               "svm_descriptor_train",
+                               args.labels)
 
     svm_grid(descriptors + "/dataset_L.csv", "L")
     svm_grid(descriptors + "/dataset_R.csv", "R")
