@@ -1,5 +1,7 @@
 #!/usr/bin/python3
-
+"""
+    Split database
+"""
 # Standard library imports
 import os
 import sys

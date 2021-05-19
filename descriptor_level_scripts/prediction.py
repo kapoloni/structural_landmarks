@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 """
-Save classifier with best params
+Classifier predictions
 """
 
 # Standard library imports
@@ -23,7 +23,7 @@ def parse_args(args):
     """!@brief
     Parse the arguments.
     """
-    parser = argparse.ArgumentParser(description='Classification models')
+    parser = argparse.ArgumentParser(description='Predictions')
     parser.add_argument('--dest_folder', help='Destination folder',
                         default='../experiment', type=str)
     parser.add_argument('--labels', help='Labels to perform the experiment',

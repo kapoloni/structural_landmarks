@@ -1,8 +1,8 @@
 #!/usr/bin/python3
-
+"""
+    Generate all descriptors attributes
+"""
 # Standard library imports
-from __future__ import absolute_import
-from __future__ import print_function
 import argparse
 import numpy as np
 import pandas as pd
@@ -43,7 +43,7 @@ def match_structural(params_):
 
     atlas = os.path.join(structural_atlas, "structural" + args.side)
     create_folders('/'.join(output.split("/")[:-1]))
-    if not os.path.exists(output + "_" + args.side + ".csv").exists():
+    if not os.path.exists(output + "_" + args.side + ".csv"):
         os.system(match_in + " -io " + atlas + " " + input_land +
                   "_" + args.side + " -to 0.5 > " +
                   output + args.side + ".csv")
@@ -99,9 +99,8 @@ def generate_final_dataset(input):
 def match_atlas_structural(filenames):
     input_land = [os.path.join(sw_landmarks, file) for file in filenames]
     outputs = [os.path.join(match_struc_folder, file) for file in filenames]
-    structural_atlas = [structural_atlas
-                        for i in range(len(input_land))]
-    params = zip(input_land, outputs, structural_atlas)
+    params = zip(input_land, outputs, [structural_atlas
+                                       for _ in range(len(input_land))])
     multproc(params, match_structural, 35)
     print("Done -- Match structural")
 

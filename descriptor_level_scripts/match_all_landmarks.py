@@ -1,8 +1,10 @@
 #!/usr/bin/python3
-
+"""
+    Match all descritors
+"""
 # Standard library imports
 import os
-import getopt
+import argparse
 import sys
 
 # Third party imports
@@ -13,23 +15,15 @@ import pandas as pd
 from utils import (create_folders)
 
 
-def showUsage():
-    print('./match_all_landmarks.py -n <result_folder>')
-    sys.exit(2)
+def parse_args(args):
+    """!@brief
+    Parse the arguments.
+    """
+    parser = argparse.ArgumentParser(description='Match all descriptors')
+    parser.add_argument('--dest_folder', help='Destination folder',
+                        default='../experiment', type=str)
 
-
-def get_params(argv):
-    try:
-        opts, _ = getopt.getopt(argv, "hn:", ["nfile=", "rfile="])
-    except getopt.GetoptError:
-        showUsage()
-    for opt, arg in opts:
-        if opt == '-h':
-            showUsage()
-        elif opt in ("-n", "--nfile"):
-            result_folder = arg
-
-    return result_folder
+    return parser.parse_args(args)
 
 
 def get_directories(csv_file):
@@ -49,17 +43,16 @@ def match(params_):
 
 if __name__ == "__main__":
 
-    if len(sys.argv) < 2:
-        showUsage()
-        exit()
-
-    result_folder = get_params(sys.argv[1:])
+    # Parse arguments
+    args = sys.argv[1:]
+    args = parse_args(args)
+    print(args)
 
     images = "imgs.csv"
 
     landmarks = os.path.join("..", "images", "hippocampus",
                              "descriptor", "spiderweb")
-    match_folder = os.path.join(result_folder, "hippocampus", "match")
+    match_folder = os.path.join(args.dest_folder, "hippocampus", "match")
 
     create_folders(match_folder)
 
