@@ -18,7 +18,6 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import GroupKFold
-from sklearn.metrics import confusion_matrix
 from sklearn.metrics import f1_score
 from sklearn.metrics import make_scorer
 
@@ -50,20 +49,6 @@ def save_csv(data, name):
 def create_folders(name):
     if not os.path.exists(name):
         os.makedirs(name, exist_ok=True)
-
-
-def getSens(estimator, x, y):
-    yPred = estimator.predict(x)
-    _, _, fn, tp = confusion_matrix(y, yPred).ravel()
-    sensitivity = tp / (tp+fn)
-    return (sensitivity)
-
-
-def getSpec(estimator, x, y):
-    yPred = estimator.predict(x)
-    tn, fp, _, _ = confusion_matrix(y, yPred).ravel()
-    specificity = tn / (tn+fp)
-    return (specificity)
 
 
 def get_descriptors(X):

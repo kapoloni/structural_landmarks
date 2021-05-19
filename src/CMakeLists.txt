@@ -38,12 +38,6 @@ INCLUDE_DIRECTORIES(
 )
 
 ADD_SUBDIRECTORY(utilities)
-ADD_SUBDIRECTORY(crop_mask)
-ADD_SUBDIRECTORY(dilate_mask)
 ADD_SUBDIRECTORY(landmarks)
 ADD_SUBDIRECTORY(filterbank)
 ADD_SUBDIRECTORY(phasecongruency)
-ADD_SUBDIRECTORY(sliceImage)
-ADD_SUBDIRECTORY(glcm_landmarks)
-ADD_SUBDIRECTORY(rl_landmarks)
-

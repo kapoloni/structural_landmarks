@@ -76,11 +76,6 @@ atlas/ventricles0.3/
 image_level_scripts/images/
 image_level_scripts/image_train_test_data/
 image_level_scripts/results/
-src/sliceImage
-src/rl_landmarks
-src/glcm_landmarks
-src/dilate_mask
-src/crop_mask
 
 
 # Translations
