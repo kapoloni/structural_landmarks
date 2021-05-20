@@ -22,7 +22,7 @@ http://adni.loni.usc.edu/ and https://brain-development.org/ixi-dataset/<br>
     ITK                    5.1
 
 # This repository contains:
-    Images filename used in each fold in experiment/cmpb/splits
+    Images filename used in each fold in experiment_cmpb/splits
  <img src="https://github.com/kapoloni/structural_landmarks/blob/main/figures/cross_validation.png" width=50%/>
 
     preprocessing scripts
