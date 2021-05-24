@@ -1,13 +1,13 @@
 #!/usr/bin/python3
 """
-    Save all classification models  (pickles) and metrics
+    Save all classification models (pickles) and metrics
 """
 # Standard library imports
+import argparse
 import numpy as np
 import os
 import pandas as pd
 import pickle
-import argparse
 import sys
 
 # Third party imports
@@ -126,6 +126,9 @@ def fit_all_classifiers(df_train, df_test):
     X_train, y_train = get_X_Y(df_train)
     X_test, y_test = get_X_Y(df_test)
     classifiers = []
+    predictions = []
+    predictions = df_test[['subj', 'class']].copy()
+    predictions.columns = ['Subject', 'True']
     for ft in get_columns_names():
         classifier = {}
         # Coarse grid classifier
@@ -138,12 +141,15 @@ def fit_all_classifiers(df_train, df_test):
         # Predictions
         y_pred = classifier['clf'].predict(X_test)
         y_score = classifier['clf'].predict_proba(X_test)[:, 1]
+        predictions['Pred_' + ft] = y_test
+        predictions['Score_' + ft] = y_score
+
         scores = metrics(y_pred, y_test, y_score,
                          classifier['clf'].best_score_)
         classifier['scores'] = scores
         classifiers.append(classifier)
 
-    return classifiers
+    return classifiers, predictions
 
 
 def one_fold(folder, exp, fold, result_folder):
@@ -152,10 +158,11 @@ def one_fold(folder, exp, fold, result_folder):
     df_train = pd.read_csv(os.path.join(folder, name_train))
     df_test = pd.read_csv(os.path.join(folder, name_test))
 
-    result = fit_all_classifiers(df_train, df_test)
+    result, predictions = fit_all_classifiers(df_train, df_test)
     outfile = open('{}/clf.pickle'.
                    format(result_folder), 'wb')
-
+    predictions.to_csv('{}/predictions.csv'.
+                       format(result_folder))
     pickle.dump(result, outfile)
     outfile.close()
 
@@ -190,7 +197,7 @@ if __name__ == "__main__":
     result_folder = os.path.join(args.dest_folder, "hippocampus",
                                  "fold", 'image_results')
 
-    exps = ['mci_ad']  # 'cn_ad', 'cn_mci',
+    exps = ['cn_ad', 'cn_mci', 'mci_ad']
     fts = ['gm', 'wm', 'csf', 'tissues']
     folds = range(10)
 
