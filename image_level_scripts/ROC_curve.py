@@ -94,15 +94,23 @@ def get_roc_probs(df, exp, ft):
     return roc_values
 
 
-def plot_roc(roc_values, save=False):
+def plot_roc(roc_values, save=False, pt=False):
     sns.set(context='paper', style='white',
             font='sans-serif', font_scale=3,
             rc={'figure.figsize': (12, 10)})
 
     mean_fpr, mean_tpr, aucs, tprs = roc_values['cn_mci'][0]
 
+    if pt:
+        name1 = 'CNxCCL'
+        name2 = 'CCLxDA'
+        name3 = 'CNxDA'
+    else:
+        name1 = 'CNxMCI'
+        name2 = 'MCIxAD'
+        name3 = 'CNxAD'
     plt.plot(mean_fpr, mean_tpr,
-             label=r'%s = %0.2f' % ('CNxMCI', np.mean(aucs)),
+             label=r'%s = %0.2f' % (name1, np.mean(aucs)),
              lw=2)
 
     std_tpr = np.std(tprs, axis=0)
@@ -112,7 +120,7 @@ def plot_roc(roc_values, save=False):
 
     mean_fpr, mean_tpr, aucs, tprs = roc_values['mci_ad'][0]
     plt.plot(mean_fpr, mean_tpr,
-             label=r'%s = %0.2f' % ('MCIxAD', np.mean(aucs)),
+             label=r'%s = %0.2f' % (name2, np.mean(aucs)),
              lw=2)
 
     std_tpr = np.std(tprs, axis=0)
@@ -123,7 +131,7 @@ def plot_roc(roc_values, save=False):
     mean_fpr, mean_tpr, aucs, tprs = roc_values['cn_ad'][0]
 
     plt.plot(mean_fpr, mean_tpr,
-             label=r'%s = %0.2f' % ('CNxAD', np.mean(aucs)),
+             label=r'%s = %0.2f' % (name3, np.mean(aucs)),
              lw=2)
 
     std_tpr = np.std(tprs, axis=0)
@@ -133,11 +141,18 @@ def plot_roc(roc_values, save=False):
 
     plt.xlim([0., 1.0])
     plt.ylim([0., 1.0])
-    plt.xlabel('1-specificity')
-    plt.ylabel('Sensitivity')
+    if pt:
+        plt.xlabel('1-especificidade')
+        plt.ylabel('Sensibilidade')
+        outname = "plots/roc_final_pt.pdf"
+    else:
+        plt.xlabel('1-specificity')
+        plt.ylabel('Sensitivity')
+        outname = "plots/roc_final.pdf"
     plt.legend(loc="lower right", fontsize='x-small')
     if save:
-        plt.savefig("plots/roc_final.pdf", bbox_inches='tight', dpi=300)
+        plt.tight_layout()
+        plt.savefig(outname, bbox_inches='tight', dpi=300)
     plt.show()
 
 
@@ -157,7 +172,8 @@ if __name__ == "__main__":
     for exp in exps:
         roc_values[exp] = get_roc_probs(results, exp, ft='tissues')
     print(np.mean(roc_values['mci_ad'][0][3]))
-    plot_roc(roc_values, save=True)
+    plot_roc(roc_values, save=True, pt=True)
+    plot_roc(roc_values, save=True, pt=False)
 
     outfile = open('results/roc_cnad.pickle', 'wb')
     pickle.dump(roc_values['cn_ad'][0], outfile)

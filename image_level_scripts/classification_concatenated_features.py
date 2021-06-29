@@ -12,9 +12,10 @@ import sys
 
 # Third party imports
 from sklearn import svm
+from sklearn.calibration import CalibratedClassifierCV
+from sklearn.model_selection import GridSearchCV
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import f1_score
 from sklearn.metrics import roc_auc_score
@@ -81,8 +82,7 @@ def coarse_grid(ft):
                      ("scale", StandardScaler()),
                      ('clf', svm.SVC(gamma='scale',
                                      kernel='poly',
-                                     class_weight='balanced',
-                                     probability=True))])
+                                     class_weight='balanced'))])
 
     param_grid = {"clf__C": [2**i for i in np.arange(-5, 10, 0.25)],
                   "clf__degree": [1]}
@@ -100,8 +100,7 @@ def finer_grid(clf, ft):
                      ("scale", StandardScaler()),
                      ('clf', svm.SVC(gamma='scale',
                                      kernel='poly',
-                                     class_weight='balanced',
-                                     probability=True))])
+                                     class_weight='balanced'))])
 
     c_exp = np.log2(np.float(clf.best_params_['clf__C']))
     c_par1 = [2**i for i in np.arange(c_exp-2, c_exp+2.1, 0.125)]
@@ -113,6 +112,27 @@ def finer_grid(clf, ft):
                        cv=skf, n_jobs=-1,
                        scoring='roc_auc')
     return clf
+
+
+def calibrate_probabilities(ft, svc):
+    # https://github.com/scikit-learn/scikit-learn/issues/13211
+    clf = svm.SVC(gamma='scale',
+                  kernel='poly',
+                  class_weight='balanced',
+                  C=svc.best_params_['clf__C'],
+                  degree=svc.best_params_['clf__degree'])
+
+    skf = StratifiedKFold(n_splits=5,
+                          shuffle=True,
+                          random_state=3)
+
+    pipe = Pipeline([("sel", ColumnExtractor(str_=ft)),
+                     ("scale", StandardScaler()),
+                     ('cal', CalibratedClassifierCV(clf,
+                                                    method='sigmoid',
+                                                    cv=skf))
+                     ])
+    return pipe
 
 
 def get_X_Y(data):
@@ -140,8 +160,11 @@ def fit_all_classifiers(df_train, df_test):
         classifier['clf'].fit(X_train, y_train)
         # Predictions
         y_pred = classifier['clf'].predict(X_test)
-        y_score = classifier['clf'].predict_proba(X_test)[:, 1]
-        predictions['Pred_' + ft] = y_test
+        y_score = classifier['clf'].decision_function(X_test)
+        classifier['cal'] = calibrate_probabilities(ft, classifier['clf'])
+        classifier['cal'].fit(X_train, y_train)
+        y_score = classifier['cal'].predict_proba(X_test)[:, 1]
+        predictions['Pred_' + ft] = y_pred
         predictions['Score_' + ft] = y_score
 
         scores = metrics(y_pred, y_test, y_score,
@@ -197,8 +220,8 @@ if __name__ == "__main__":
     result_folder = os.path.join(args.dest_folder, "hippocampus",
                                  "fold", 'image_results')
 
-    exps = ['cn_ad', 'cn_mci', 'mci_ad']
-    fts = ['gm', 'wm', 'csf', 'tissues']
+    exps = ['cn_mci', 'mci_ad', 'cn_ad']
+    fts = ['tissues']  # 'gm', 'wm', 'csf',
     folds = range(10)
 
     all_folds(exps, folds)

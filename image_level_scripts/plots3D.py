@@ -17,7 +17,8 @@ sns.set(context='notebook', style='white',
         rc={'figure.figsize': (15, 15)})
 
 
-def plot_3D(c0, c1, xlabel, ylabel, zlabel, leglabel, outname, dt, loc, num=5):
+def plot_3D(c0, c1, xlabel, ylabel, zlabel, leglabel, outname, dt,
+            loc, num=5, pt=False):
     dt_back = dt.copy()
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
@@ -48,10 +49,14 @@ def plot_3D(c0, c1, xlabel, ylabel, zlabel, leglabel, outname, dt, loc, num=5):
     ax.set_xlabel(xlabel, labelpad=15)
     ax.set_ylabel(ylabel, labelpad=15)
     ax.set_zlabel(zlabel, labelpad=15)
+    if pt:
+        title = "Grupos"
+    else:
+        title = "Diagnosis"
     legend1 = ax.legend([pnt3d, pnt3d1],
                         [c1, c0],
                         numpoints=1,
-                        title="Diagnosis",
+                        title=title,
                         loc=[0.72, 0.25])
     ax.add_artist(legend1)
 
@@ -77,7 +82,7 @@ def plot_3D(c0, c1, xlabel, ylabel, zlabel, leglabel, outname, dt, loc, num=5):
 
 
 def plot_3D_mciad(c0, c1, xlabel, ylabel, zlabel, leglabel, outname,
-                  dt, loc, num=5):
+                  dt, loc, num=5, pt=False):
     dt_back = dt.copy()
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
@@ -97,7 +102,6 @@ def plot_3D_mciad(c0, c1, xlabel, ylabel, zlabel, leglabel, outname,
     xs = dt['0D']
     ys = dt['0E']
     zs = dt['1D']
-
     pnt3d1 = ax.scatter(xs, ys, zs, s=dt['1E']*ft,
                         c='darkorange',
                         zdir='z',
@@ -111,10 +115,14 @@ def plot_3D_mciad(c0, c1, xlabel, ylabel, zlabel, leglabel, outname,
     ax.set_xlabel(xlabel, labelpad=15)
     ax.set_ylabel(ylabel, labelpad=15)
     ax.set_zlabel(zlabel, labelpad=15)
+    if pt:
+        title = "Grupos"
+    else:
+        title = "Diagnosis"
     legend1 = ax.legend([pnt3d1, pnt3d],
                         [c0, c1],
                         numpoints=1,
-                        title="Diagnosis",
+                        title=title,
                         loc=[0.72, 0.25])
     ax.add_artist(legend1)
 
@@ -147,23 +155,35 @@ def get_data(fold_range, exp):
                                  exp, 'fts_test.csv')
         df_test = pd.read_csv(name_test)
         cols = df_test.columns
+        subj = df_test.loc[:, 'subj']
         y = df_test.loc[:, 'class']
         ft = df_test.loc[:, cols.str.contains('tissues')]
         ft.columns = [col.split("_")[0] for col in ft.columns]
-        ft = pd.concat([ft, y], axis=1)
+        ft = pd.concat([subj, ft, y], axis=1)
         return ft
 
 
 if __name__ == "__main__":
 
     ft = get_data([6, 7], 'cn_ad')
-    plot_3D('CN', 'AD', '# CN left', '# CN right', '# AD right',
+
+    plot_3D('CN', 'AD', '# CN right', '# CN left', '# AD right',
             "# AD left", 'cn_ad_points.png', ft, [0.12, 0.57], 5)
+    plot_3D('CN', 'DA', '# CN direito', '# CN esquerdo', '# DA direito',
+            "# DA esquerdo", 'cn_ad_points_pt.png', ft,
+            [0.12, 0.57], 5, pt=True)
 
     ft = get_data([2, 3], 'cn_mci')
     plot_3D('CN', 'MCI', '# CN left', '# CN right', '# MCI right',
             "# MCI left", 'cn_mci_points.png', ft, [0.12, 0.57], 5)
+    plot_3D('CN', 'CCL', '# CN esquerdo', '# CN direito', '# CCL direito',
+            "# CCL esquerdo", 'cn_mci_points_pt.png', ft,
+            [0.12, 0.57], 5, pt=True)
 
     ft = get_data([5, 6], 'mci_ad')
     plot_3D_mciad('AD', 'MCI', '# MCI left', '# MCI right', '# AD right',
                   "# AD left", 'mci_ad_points.png', ft, [0.12, 0.57], 5)
+
+    plot_3D_mciad('DA', 'CCL', '# CCL esquerdo', '# CCL direito',
+                  '# DA direito', "# DA esquerdo",
+                  'mci_ad_points_pt.png', ft, [0.12, 0.57], 5, pt=True)
