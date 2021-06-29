@@ -51,6 +51,8 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 
+
+image_level_scripts/get_best_worst_subjects.py
 # Myfolders
 template/
 structural_landmarks/
