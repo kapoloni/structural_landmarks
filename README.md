@@ -1,5 +1,5 @@
 # Implementation of the paper
-## Automated detection, selection and classification of hippocampal landmark points for the diagnosis of Alzheimer's disease.
+## [Automated detection, selection and classification of hippocampal landmark points for the diagnosis of Alzheimer's disease](https://www.sciencedirect.com/science/article/abs/pii/S0169260721006556)
 
 Our approach, based on a two-level classification, first detects and
 selects discriminative landmark points from two diagnosis populations based on
